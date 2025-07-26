@@ -65,7 +65,7 @@ class AboutPage(QWidget):
         github_btn = QPushButton("GitHub Repository")
         github_btn.setObjectName("aboutLink")
         github_btn.setStyleSheet(ABOUT_PAGE_STYLE)
-        github_btn.clicked.connect(lambda: self.open_link("https://github.com/crazyw0lf/En-Deu-Cards-for-Anki.git"))
+        github_btn.clicked.connect(lambda: self.open_link("https://github.com/crazyw0lf/EN_DEU_CARDS"))
 
         links_layout.addWidget(github_btn)
         layout.addLayout(links_layout)
