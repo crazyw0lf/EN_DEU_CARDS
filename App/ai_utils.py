@@ -12,15 +12,13 @@ def load_api_keys(filepath: str = "api_keys.json") -> List[Dict[str, str]]:
         data = json.load(f)
     return [{"name": item["name"], "key": item["key"]} for item in data]
 
-
-# Список ключей
-API_KEYS = load_api_keys()
-
 # Глобальный клиент (будет обновляться при смене ключа)
 current_client_index = 0
 
 
 def get_client() -> Groq:
+    # Список ключей
+    API_KEYS = load_api_keys()
     global current_client_index
     key_info = API_KEYS[current_client_index]
     print(f"Using API key from: {key_info['name']}")  # Для отладки
@@ -28,6 +26,8 @@ def get_client() -> Groq:
 
 
 def make_request_with_retry(messages, model="llama-3.3-70b-versatile"):
+    # Список ключей
+    API_KEYS = load_api_keys()
     global current_client_index
     max_retries = len(API_KEYS)  # Количество попыток = количество ключей
     last_exception = None
@@ -116,7 +116,7 @@ Your task is to:
    - Nouns, adjectives, pronouns (like ich, du, er, sie, es)
    - Numbers, symbols, and incomplete entries
    - Common non-verbs like "bitte", "danke", "ja", "nein", "und", etc.
-   - Rare or complex verbs not typically taught at A1–B2 level (e.g., "grüßen", "entschuldigen")
+   - Rare or complex verbs
 
 3. For each selected verb:
    - Convert it to its infinitive form if it's in a conjugated or misspelled form.
