@@ -1,22 +1,42 @@
 # main_screen.py
 
-from PyQt5.QtWidgets import QWidget, QVBoxLayout, QLabel, QPushButton
-from PyQt5.QtCore import Qt, QTimer
+from PyQt5.QtWidgets import QWidget, QVBoxLayout, QLabel, QPushButton, QDialog
+from PyQt5.QtCore import Qt, QTimer, pyqtSignal
 from PyQt5.QtWidgets import QProgressBar
 import math
 
 
-class ProgressBar(QProgressBar):
-    def __init__(self, parent=None, chp_amount=1):
+class ProgressBarDialog(QDialog):
+    finished = pyqtSignal()  # Сигнал завершения процесса
+
+    def __init__(self, chp_amount=1, parent=None):
         super().__init__(parent)
-
-        self.chp_amount = max(1, chp_amount)  # минимум 1 чекпоинт
+        self.chp_amount = max(1, chp_amount)
         self.current_checkpoint = 0
+        self.setup_ui()
+        self.setup_progress_bar()
 
-        self.setRange(0, 100)
-        self.setValue(0)
-        self.setTextVisible(True)
-        self.setFormat("%p%")
+    def setup_ui(self):
+        self.setWindowTitle("Processing...")
+        self.setModal(True)
+        self.setFixedSize(400, 150)
+
+        layout = QVBoxLayout()
+
+        # Метка с описанием процесса
+        self.status_label = QLabel("Processing files...")
+        self.status_label.setAlignment(Qt.AlignCenter)
+        layout.addWidget(self.status_label)
+
+        # Прогресс-бар
+        self.progress_bar = QProgressBar()
+        self.progress_bar.setRange(0, 100)
+        self.progress_bar.setValue(0)
+        self.progress_bar.setTextVisible(True)
+        self.progress_bar.setFormat("%p%")
+        layout.addWidget(self.progress_bar)
+
+        self.setLayout(layout)
 
         # Цель - первый чекпоинт
         self.target_value = 100 / self.chp_amount
@@ -24,28 +44,36 @@ class ProgressBar(QProgressBar):
         self.timer = QTimer()
         self.timer.setInterval(50)
         self.timer.timeout.connect(self.update_progress)
+
+    def setup_progress_bar(self):
+        self.progress_bar.setValue(0)
+        self.current_checkpoint = 0
+        self.target_value = 100 / self.chp_amount if self.chp_amount > 0 else 100
+
+    def start_progress(self):
+        """Запустить прогресс-бар"""
+        self.setup_progress_bar()
         self.timer.start()
+        self.show()
 
     def update_progress(self):
-        current_value = self.value()
+        current_value = self.progress_bar.value()
 
         if current_value < self.target_value:
             # Вычисляем расстояние до цели
             distance_to_target = self.target_value - current_value
 
             # Используем экспоненциальное замедление
-            # Чем ближе к цели, тем меньше шаг
-            step = max(0.1, distance_to_target * 0.05)  # 5% от оставшегося расстояния
+            step = max(0.1, distance_to_target * 0.05)
 
             new_value = current_value + step
 
-            # Проверяем, достигли ли цели
             if new_value >= self.target_value:
                 new_value = self.target_value
-                self.setValue(new_value)
-                self.timer.stop()  # останавливаемся точно у цели
+                self.progress_bar.setValue(new_value)
+                self.timer.stop()
             else:
-                self.setValue(new_value)
+                self.progress_bar.setValue(new_value)
 
     def complete_checkpoint(self):
         """Завершить текущий чекпоинт"""
@@ -53,25 +81,23 @@ class ProgressBar(QProgressBar):
             self.current_checkpoint += 1
             self.target_value = (self.current_checkpoint + 1) * (100 / self.chp_amount)
 
-            # Возобновляем движение если остановлены
             if not self.timer.isActive():
                 self.timer.start()
         else:
-            # Последний этап - устанавливаем 100%
-            self.setValue(100)
+            self.progress_bar.setValue(100)
             self.timer.stop()
+            self.finished.emit()  # Эмитируем сигнал завершения
+            self.close()
 
     def reset_progress(self):
         """Сбросить прогресс"""
         self.timer.stop()
-        self.setValue(0)
-        self.current_checkpoint = 0
-        self.target_value = 100 / self.chp_amount if self.chp_amount > 0 else 100
+        self.setup_progress_bar()
         self.timer.start()
 
-    def is_at_checkpoint(self):
-        """Проверить, достигнут ли чекпоинт"""
-        return not self.timer.isActive() and self.value() == self.target_value
+    def update_status(self, text):
+        """Обновить текст статуса"""
+        self.status_label.setText(text)
 
 
 class MainScreen(QWidget):
@@ -79,7 +105,7 @@ class MainScreen(QWidget):
         super().__init__()
         self.main_window = main_window
         self.current_file_paths = []
-        self.progress_bar = None
+        self.progress_dialog = None
         self.init_ui()
 
     def init_ui(self):
@@ -103,28 +129,6 @@ class MainScreen(QWidget):
         self.path_label.setWordWrap(True)
         layout.addWidget(self.path_label)
 
-        # Кнопка выбора файлов
-        select_btn = QPushButton("Select Files")
-        select_btn.setFixedWidth(200)
-        select_btn.clicked.connect(self.open_file_dialog)
-        layout.addWidget(select_btn)
-
-        # Кнопки для создания текста и словаря
-        self.create_text_btn = QPushButton("Create Text")
-        self.create_text_btn.setFixedWidth(200)
-        self.create_text_btn.clicked.connect(self.create_text)
-        layout.addWidget(self.create_text_btn)
-
-        self.create_dict_btn = QPushButton("Create Dictionary")
-        self.create_dict_btn.setFixedWidth(200)
-        self.create_dict_btn.clicked.connect(self.create_dict)
-        layout.addWidget(self.create_dict_btn)
-
-        # Прогресс-бар (изначально скрыт)
-        self.progress_bar = ProgressBar(chp_amount=4)  # 4 этапа
-        self.progress_bar.setVisible(False)
-        layout.addWidget(self.progress_bar)
-
         self.setLayout(layout)
 
     def update_path_display(self):
@@ -135,12 +139,11 @@ class MainScreen(QWidget):
             self.path_label.setToolTip("")
         elif count == 1:
             path = self.current_file_paths[0]
-            filename = path.split("/")[-1]  # Имя файла
+            filename = path.split("/")[-1]
             self.path_label.setText(f"Selected:\n{filename}")
             self.path_label.setToolTip(path)
         else:
             self.path_label.setText(f"Selected {count} files")
-            # Показываем все пути в подсказке
             tooltip_text = "\n".join([p.split("/")[-1] for p in self.current_file_paths])
             self.path_label.setToolTip(f"Files:\n{tooltip_text}")
 
@@ -148,11 +151,10 @@ class MainScreen(QWidget):
         """Открывает диалог выбора нескольких файлов и сохраняет их пути"""
         from PyQt5.QtWidgets import QFileDialog
 
-        # Фильтры для поддерживаемых форматов
         file_paths, _ = QFileDialog.getOpenFileNames(
             self,
-            "Select Files (PDF, Images)",  # Заголовок окна
-            "",  # Начальная директория (пусто — последняя)
+            "Select Files (PDF, Images)",
+            "",
             "Supported Files (*.pdf *.png *.jpg *.jpeg);;"
             "PDF Files (*.pdf);;"
             "Image Files (*.png *.jpg *.jpeg);;"
@@ -160,74 +162,10 @@ class MainScreen(QWidget):
         )
 
         if file_paths:
-            self.current_file_paths = file_paths  # Сохраняем список путей
+            self.current_file_paths = file_paths
             self.update_path_display()
             print(f"[DEBUG] Selected files: {self.current_file_paths}")
 
     def get_current_file_paths(self):
         """Возвращает список путей к выбранным файлам"""
         return self.current_file_paths.copy()
-
-    def create_text(self):
-        """Функция создания текста с прогресс-баром"""
-        if not self.current_file_paths:
-            print("No files selected!")
-            return
-
-        print("Starting text creation...")
-
-        # Показываем прогресс-бар
-        self.progress_bar.setVisible(True)
-        self.progress_bar.reset_progress()
-
-        # Блокируем кнопки во время процесса
-        self.create_text_btn.setEnabled(False)
-        self.create_dict_btn.setEnabled(False)
-
-        # Здесь будет ваша логика создания текста
-        # После каждого этапа вызывайте:
-        # self.progress_bar.complete_checkpoint()
-
-        # Пример симуляции процесса (в реальном коде замените на вашу логику)
-        QTimer.singleShot(2000, lambda: self.on_stage_completed(1))  # Этап 1
-
-    def create_dict(self):
-        """Функция создания словаря с прогресс-баром"""
-        if not self.current_file_paths:
-            print("No files selected!")
-            return
-
-        print("Starting dictionary creation...")
-
-        # Показываем прогресс-бар
-        self.progress_bar.setVisible(True)
-        self.progress_bar.reset_progress()
-
-        # Блокируем кнопки во время процесса
-        self.create_text_btn.setEnabled(False)
-        self.create_dict_btn.setEnabled(False)
-
-        # Здесь будет ваша логика создания словаря
-        # После каждого этапа вызывайте:
-        # self.progress_bar.complete_checkpoint()
-
-        # Пример симуляции процесса
-        QTimer.singleShot(2000, lambda: self.on_stage_completed(1))  # Этап 1
-
-    def on_stage_completed(self, stage):
-        """Обработчик завершения этапа"""
-        if self.progress_bar:
-            self.progress_bar.complete_checkpoint()
-            print(f"Stage {stage} completed")
-
-            # Проверяем, все ли этапы завершены
-            if stage < 4:  # Всего 4 этапа
-                # Запускаем следующий этап
-                QTimer.singleShot(2000, lambda: self.on_stage_completed(stage + 1))
-            else:
-                # Все этапы завершены
-                print("Process completed!")
-                self.create_text_btn.setEnabled(True)
-                self.create_dict_btn.setEnabled(True)
-                # Можно скрыть прогресс-бар через некоторое время
-                QTimer.singleShot(3000, lambda: self.progress_bar.setVisible(False))
