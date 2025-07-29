@@ -20,19 +20,19 @@ class ApiKeysPage(QWidget):
     def init_ui(self):
         layout = QVBoxLayout(self)
 
-        # Заголовок
+        # Title
         title = QLabel("API Keys")
         title.setStyleSheet("font-size: 20px; font-weight: bold;")
         layout.addWidget(title)
 
-        # Описание
+        # description
         description = QLabel(
             "Manage your API keys. Remember to keep your API keys safe to prevent unauthorized access."
         )
         description.setStyleSheet("color: #aaaaaa;")
         layout.addWidget(description)
 
-        # Кнопка Create
+        # Create button
         create_btn = QPushButton("Create API Key")
         create_btn.setStyleSheet("""
             QPushButton {
@@ -48,7 +48,7 @@ class ApiKeysPage(QWidget):
         create_btn.clicked.connect(self.show_create_dialog)
         layout.addWidget(create_btn, alignment=Qt.AlignRight)
 
-        # Таблица
+        # Table for displaying API keys
         self.table = QTableWidget()
         self.table.setColumnCount(4)
         self.table.setHorizontalHeaderLabels(["NAME", "SECRET KEY", "", ""])
@@ -56,14 +56,14 @@ class ApiKeysPage(QWidget):
         layout.addWidget(self.table)
 
     def load_keys(self):
-        """Загружает ключи из файла и отображает в таблице"""
+        # load and display API keys
         self.api_keys = load_api_keys()
         self.table.setRowCount(0)
 
         for row, key_data in enumerate(self.api_keys):
             self.table.insertRow(row)
             self.table.setItem(row, 0, QTableWidgetItem(key_data["name"]))
-            # Отображаем только первую и последнюю часть ключа
+            # display masked key
             masked_key = self.mask_key(key_data["key"])
             self.table.setItem(row, 1, QTableWidgetItem(masked_key))
 
@@ -100,7 +100,7 @@ class ApiKeysPage(QWidget):
             self.table.setCellWidget(row, 3, delete_btn)
 
     def mask_key(self, key):
-        """Маскирует ключ, оставляя только первые и последние 4 символа"""
+        # mask the key for display
         if len(key) <= 8:
             return key
         return f"{key[:4]}...{key[-4:]}"

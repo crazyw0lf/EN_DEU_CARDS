@@ -7,7 +7,7 @@ import math
 
 
 class ProgressBarDialog(QDialog):
-    finished = pyqtSignal()  # Сигнал завершения процесса
+    finished = pyqtSignal()  # signal to indicate processing is finished
 
     def __init__(self, chp_amount=1, parent=None):
         super().__init__(parent)
@@ -23,12 +23,12 @@ class ProgressBarDialog(QDialog):
 
         layout = QVBoxLayout()
 
-        # Метка с описанием процесса
+        # title label
         self.status_label = QLabel("Processing files...")
         self.status_label.setAlignment(Qt.AlignCenter)
         layout.addWidget(self.status_label)
 
-        # Прогресс-бар
+        # progress bar
         self.progress_bar = QProgressBar()
         self.progress_bar.setRange(0, 100)
         self.progress_bar.setValue(0)
@@ -38,7 +38,7 @@ class ProgressBarDialog(QDialog):
 
         self.setLayout(layout)
 
-        # Цель - первый чекпоинт
+        # Goal value for the progress bar
         self.target_value = 100 / self.chp_amount
 
         self.timer = QTimer()
@@ -51,7 +51,7 @@ class ProgressBarDialog(QDialog):
         self.target_value = 100 / self.chp_amount if self.chp_amount > 0 else 100
 
     def start_progress(self):
-        """Запустить прогресс-бар"""
+        # start the progress bar and timer
         self.setup_progress_bar()
         self.timer.start()
         self.show()
@@ -60,10 +60,10 @@ class ProgressBarDialog(QDialog):
         current_value = self.progress_bar.value()
 
         if current_value < self.target_value:
-            # Вычисляем расстояние до цели
+            # calculate the distance to the target value
             distance_to_target = self.target_value - current_value
 
-            # Используем экспоненциальное замедление
+            # use exponential step size based on distance
             step = max(0.1, distance_to_target * 0.05)
 
             new_value = current_value + step
@@ -76,7 +76,7 @@ class ProgressBarDialog(QDialog):
                 self.progress_bar.setValue(new_value)
 
     def complete_checkpoint(self):
-        """Завершить текущий чекпоинт"""
+        # complete the current checkpoint and move to the next one
         if self.current_checkpoint < self.chp_amount - 1:
             self.current_checkpoint += 1
             self.target_value = (self.current_checkpoint + 1) * (100 / self.chp_amount)
@@ -86,17 +86,17 @@ class ProgressBarDialog(QDialog):
         else:
             self.progress_bar.setValue(100)
             self.timer.stop()
-            self.finished.emit()  # Эмитируем сигнал завершения
+            self.finished.emit()  # emit signal that processing is finished
             self.close()
 
     def reset_progress(self):
-        """Сбросить прогресс"""
+        # reset the progress bar to the initial state
         self.timer.stop()
         self.setup_progress_bar()
         self.timer.start()
 
     def update_status(self, text):
-        """Обновить текст статуса"""
+        # update the status label with the given text
         self.status_label.setText(text)
 
 
@@ -113,17 +113,17 @@ class MainScreen(QWidget):
         layout.setSpacing(20)
         layout.setAlignment(Qt.AlignCenter)
 
-        # Заголовок
+        # title
         title_label = QLabel("DeuCards")
         title_label.setStyleSheet("font-size: 48px; font-weight: bold; color: white;")
         layout.addWidget(title_label)
 
-        # Подзаголовок
+        # subtitle
         subtitle_label = QLabel("Create smart German Anki decks automatically")
         subtitle_label.setStyleSheet("font-size: 28px; color: #aaaaaa;")
         layout.addWidget(subtitle_label)
 
-        # Отображение выбранного файла
+        # display selected file paths
         self.path_label = QLabel("No file selected")
         self.path_label.setStyleSheet("font-size: 24px; color: #999999;")
         self.path_label.setWordWrap(True)
@@ -132,7 +132,7 @@ class MainScreen(QWidget):
         self.setLayout(layout)
 
     def update_path_display(self):
-        """Обновляет метку с информацией о выбранных файлах"""
+        # updates the label to show the currently selected file paths
         count = len(self.current_file_paths)
         if count == 0:
             self.path_label.setText("No files selected")
@@ -148,7 +148,7 @@ class MainScreen(QWidget):
             self.path_label.setToolTip(f"Files:\n{tooltip_text}")
 
     def open_file_dialog(self):
-        """Открывает диалог выбора нескольких файлов и сохраняет их пути"""
+        # creates a file dialog to select multiple files
         from PyQt5.QtWidgets import QFileDialog
 
         file_paths, _ = QFileDialog.getOpenFileNames(
@@ -167,5 +167,5 @@ class MainScreen(QWidget):
             print(f"[DEBUG] Selected files: {self.current_file_paths}")
 
     def get_current_file_paths(self):
-        """Возвращает список путей к выбранным файлам"""
+        # returns a copy of the current file paths to avoid external modifications
         return self.current_file_paths.copy()

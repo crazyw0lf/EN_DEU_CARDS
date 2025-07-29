@@ -16,13 +16,13 @@ class AboutPage(QWidget):
         layout.setContentsMargins(20, 20, 20, 20)
         layout.setSpacing(15)
 
-        # === Заголовок ===
+        # Title
         title_label = QLabel("About DeuCards")
         title_label.setObjectName("aboutTitle")
         title_label.setStyleSheet(ABOUT_PAGE_STYLE)
         layout.addWidget(title_label)
 
-        # === Логотип / Иконка ===
+        # Icon
         icon_label = QLabel()
         pixmap = QPixmap("icons/app_icon.png")
         if not pixmap.isNull():
@@ -32,19 +32,19 @@ class AboutPage(QWidget):
             icon_label.setStyleSheet("font-size: 16px; color: #777;")
         layout.addWidget(icon_label)
 
-        # === Версия ===
+        # Version
         version_label = QLabel("Version 1.0.0")
         version_label.setObjectName("versionLabel")
         version_label.setStyleSheet(ABOUT_PAGE_STYLE)
         layout.addWidget(version_label)
 
-        # === Автор ===
+        # Author
         author_label = QLabel("Created by Hryhorii Antoniuk")
         author_label.setObjectName("authorIntel")
         author_label.setStyleSheet(ABOUT_PAGE_STYLE)
         layout.addWidget(author_label)
 
-        # === Описание ===
+        # Description
         desc_text = (
             "DeuCards is a smart and intuitive app designed to help you learn German "
             "effortlessly by generating custom Anki flashcard decks.\n\n"
@@ -60,7 +60,7 @@ class AboutPage(QWidget):
         description_label.setStyleSheet(ABOUT_PAGE_STYLE)
         layout.addWidget(description_label)
 
-        # === Ссылки (например, GitHub) ===
+        # Github Link
         links_layout = QHBoxLayout()
         github_btn = QPushButton("GitHub Repository")
         github_btn.setObjectName("aboutLink")

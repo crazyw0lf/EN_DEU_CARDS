@@ -10,24 +10,24 @@ class ApiKeyDialog(QDialog):
 
         layout = QVBoxLayout(self)
 
-        # Имя
+        # Name
         self.name_input = QLineEdit(name)
         self.name_input.setPlaceholderText("Name")
         layout.addWidget(QLabel("Name:"))
         layout.addWidget(self.name_input)
 
-        # Ключ
+        # Key
         self.key_input = QLineEdit(key)
         self.key_input.setPlaceholderText("Secret Key")
         layout.addWidget(QLabel("Secret Key:"))
         layout.addWidget(self.key_input)
 
-        # Кнопки
+        # Buttons
         btn_layout = QHBoxLayout()
         self.ok_btn = QPushButton("OK")
         self.cancel_btn = QPushButton("Cancel")
 
-        # Стили кнопок
+        # Button styles
         self.ok_btn.setObjectName("dialog_ok")
         self.cancel_btn.setObjectName("dialog_cancel")
         self.setStyleSheet("""
@@ -51,7 +51,7 @@ class ApiKeyDialog(QDialog):
                     }
                 """)
 
-        self.ok_btn.setDefault(True)  # Установить как дефолтную кнопку (Enter)
+        self.ok_btn.setDefault(True)
         self.ok_btn.clicked.connect(self.accept)
         self.cancel_btn.clicked.connect(self.reject)
 
@@ -79,7 +79,7 @@ class ConfirmationDialog(QDialog):
         top_layout.addWidget(self.message_label)
         layout.addLayout(top_layout)
 
-        # === Кнопки ===
+        # Buttons
         btn_layout = QHBoxLayout()
 
         self.yes_btn = QPushButton("Yes")
@@ -88,10 +88,10 @@ class ConfirmationDialog(QDialog):
         self.yes_btn.setObjectName("yes_button")
         self.no_btn.setObjectName("no_button")
 
-        self.yes_btn.clicked.connect(self.accept)   # Закрывает диалог и возвращает QDialog.Accepted
-        self.no_btn.clicked.connect(self.reject)   # Закрывает диалог и возвращает QDialog.Rejected
+        self.yes_btn.clicked.connect(self.accept)   # cancel dialog and return QDialog.Accepted
+        self.no_btn.clicked.connect(self.reject)   # cancel dialog and return QDialog.Rejected
 
-        # Применяем стили
+        # Implementing styles
         self.yes_btn.setStyleSheet("""
             QPushButton#yes_button {
                 background-color: #d32f2f;
@@ -117,7 +117,7 @@ class ConfirmationDialog(QDialog):
             }
         """)
 
-        # === Добавляем кнопки ===
+        # add buttons to layout
         btn_layout.addStretch()
         btn_layout.addWidget(self.yes_btn)
         btn_layout.addWidget(self.no_btn)
@@ -167,7 +167,7 @@ class SingleInputDialog(QDialog):
             }
         """)
 
-        self.ok_btn.setDefault(True)  # Set as default button (Enter)
+        self.ok_btn.setDefault(True)
         self.ok_btn.clicked.connect(self.accept)
         self.cancel_btn.clicked.connect(self.reject)
 

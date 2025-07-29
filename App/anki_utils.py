@@ -60,9 +60,9 @@ def create_s_deck(label):
     HTML_QUESTION = """
         <div class="card">
           <div>{{Front}}</div>
-          <input type="text" id="user_input" class="input-box" placeholder="Введите перевод">
+          <input type="text" id="user_input" class="input-box" placeholder="Input translation">
           <br>
-          <button class="check-btn" onclick="checkAnswer()">Проверить</button>
+          <button class="check-btn" onclick="checkAnswer()">Check</button>
         </div>
 
         <script>
@@ -71,15 +71,15 @@ def create_s_deck(label):
           const correctAnswer = "{{Back}}".trim();
 
           if (!userInput) {
-            alert("Введите перевод!");
+            alert("Input translation!");
             return;
           }
 
           const inputBox = document.getElementById('user_input');
           if (userInput.toLowerCase() === correctAnswer.toLowerCase()) {
-            inputBox.style.backgroundColor = '#baffc9'; // зелёный
+            inputBox.style.backgroundColor = '#baffc9'; // red
           } else {
-            inputBox.style.backgroundColor = '#ffb3b3'; // красный
+            inputBox.style.backgroundColor = '#ffb3b3'; // green
           }
         }
         </script>
@@ -89,9 +89,9 @@ def create_s_deck(label):
         {{FrontSide}}
         <hr>
         <div class="card">
-          <div>Правильный перевод:</div>
+          <div>Correct translation:</div>
           <div style="margin-top: 10px; font-weight: bold;">{{Back}}</div>
-          <button class="audio-btn" onclick="playAudio()">🔊 Воспроизвести</button>
+          <button class="audio-btn" onclick="playAudio()">🔊 Play</button>
           <audio id="back_audio"></audio>
         </div>
 
@@ -101,7 +101,7 @@ def create_s_deck(label):
           if (!audioElement.src) {
             audioElement.src = "{{Audio_Back}}";
           }
-          audioElement.play().catch(e => console.error("Ошибка воспроизведения:", e));
+          audioElement.play().catch(e => console.error("Play error:", e));
         }
         </script>
         """
@@ -133,7 +133,7 @@ def create_s_deck(label):
                     if len(arr) == 2:
                         word_pairs.append(arr)
     except FileNotFoundError:
-        print(f"Файл {filename} не найден!")
+        print(f"Can't find file: {filename}!")
         return
 
     random.shuffle(word_pairs)
@@ -153,7 +153,7 @@ def create_s_deck(label):
             audio_base64 = base64.b64encode(audio_bytes).decode('utf-8')
             audio_field = f"data:audio/mpeg;base64,{audio_base64}"
         except Exception as e:
-            print(f"Ошибка при генерации аудио для '{back}': {e}")
+            print(f"Error while generating audio for '{back}': {e}")
             audio_field = ""
 
         note = genanki.Note(
@@ -170,7 +170,7 @@ def create_s_deck(label):
         os.remove(path)
 
     package.write_to_file(path)
-    print(f'Колода успешно создана: {path}')
+    print(f'Successfully created deck at the path: {path}')
 
 def create_v_deck(label):
     MODEL_ID = random.randint(1, 10000)
@@ -226,9 +226,9 @@ def create_v_deck(label):
     HTML_QUESTION = """
     <div class="card">
       <div>{{Front}}</div>
-      <input type="text" id="user_input" class="input-box" placeholder="Введите перевод">
+      <input type="text" id="user_input" class="input-box" placeholder="Input translation">
       <br>
-      <button class="check-btn" onclick="checkAnswer()">Проверить</button>
+      <button class="check-btn" onclick="checkAnswer()">Check</button>
     </div>
 
     <script>
@@ -237,15 +237,15 @@ def create_v_deck(label):
       const correctAnswer = "{{Back}}".trim();
 
       if (!userInput) {
-        alert("Введите перевод!");
+        alert("Input translation!");
         return;
       }
 
       const inputBox = document.getElementById('user_input');
       if (userInput.toLowerCase() === correctAnswer.toLowerCase()) {
-        inputBox.style.backgroundColor = '#baffc9'; // зелёный
+        inputBox.style.backgroundColor = '#baffc9'; // red
       } else {
-        inputBox.style.backgroundColor = '#ffb3b3'; // красный
+        inputBox.style.backgroundColor = '#ffb3b3'; // green
       }
     }
     </script>
@@ -255,13 +255,13 @@ def create_v_deck(label):
     {{FrontSide}}
     <hr>
     <div class="card">
-      <div>Правильный перевод:</div>
+      <div>Correct translation:</div>
       <div style="margin-top: 10px; font-weight: bold;">{{Back}}</div>
       <div style="margin-top: 8px;">ich {{ich}} ; du {{du}}</div>
       <div style="margin-top: 8px;">er {{er}} ; wir {{wir}}</div>
       <div style="margin-top: 8px;">ihr {{ihr}} ; sie {{sie}}</div>
 
-      <button class="audio-btn" onclick="playAudio()">🔊 Произношение</button>
+      <button class="audio-btn" onclick="playAudio()">🔊 Play</button>
       <audio id="back_audio"></audio>
     </div>
 
@@ -271,7 +271,7 @@ def create_v_deck(label):
       if (!audioElement.src) {
         audioElement.src = "data:audio/mpeg;base64,{{Audio_Back}}";
       }
-      audioElement.play().catch(e => console.error("Ошибка воспроизведения:", e));
+      audioElement.play().catch(e => console.error("Error playing:", e));
     }
     </script>
     """
@@ -311,9 +311,9 @@ def create_v_deck(label):
                     if len(arr) == 8:
                         word_pairs.append(arr)
                     else:
-                        print(f"Некорректная строка (не 7 полей): {line}")
+                        print(f"Incorrect structure: {line}")
     except FileNotFoundError:
-        print(f"Файл {filename} не найден!")
+        print(f"Can't find file: {filename}")
         return
 
     random.shuffle(word_pairs)
@@ -321,7 +321,7 @@ def create_v_deck(label):
     for row in word_pairs:
         back = " ; ".join(row[1:])
 
-        # Генерация Base64-аудио для немецкого слова (Back)
+        # Audio generation
         try:
             tts = gTTS(text=back, lang='de', slow=False)
             fp = io.BytesIO()
@@ -330,10 +330,10 @@ def create_v_deck(label):
             audio_bytes = fp.read()
             audio_base64 = base64.b64encode(audio_bytes).decode('utf-8')
         except Exception as e:
-            print(f"Ошибка при генерации аудио для '{back}': {e}")
+            print(f"Error while generating audio '{back}': {e}")
             audio_base64 = ""
 
-        # Добавляем Base64 в конец полей
+        # Adding the audio field
         fields = row + [audio_base64]
 
         note = genanki.Note(model=model, fields=fields)
@@ -346,4 +346,4 @@ def create_v_deck(label):
         os.remove(path)
 
     package.write_to_file(path)
-    print(f'Колода успешно создана: {path}')
+    print(f'Successfully created deck at the path: {path}')

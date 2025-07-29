@@ -136,20 +136,20 @@ class MainWindow(QMainWindow):
         self.setWindowTitle("API Key Manager")
         self.setWindowIcon(QIcon("icons/app_icon.png"))
         self.resize(1000, 600)
-        # Список для хранения ссылок на текстовые редакторы
+        # list to hold text editors
         self.text_editors = []
-        # === QStackedWidget для переключения между экранами ===
+        # qstacked widget to hold different screens
         self.stackedWidget = QStackedWidget(self)
         self.setCentralWidget(self.stackedWidget)
-        # === Создаем экраны ===
+        # create screens
         self.main_screen = MainScreen(self)
         self.settings_screen = SettingsScreen(self)
-        # Добавляем в стек
+        # add screens to the stacked widget
         self.stackedWidget.addWidget(self.main_screen)  # index 0
         self.stackedWidget.addWidget(self.settings_screen)  # index 1
-        # === Менюбар ===
+        # menu bar
         self.create_menu_bar()
-        # === Стиль ===
+        # style the main window
         self.setStyleSheet(APP_STYLE)
         # --- For Threading ---
         self.progress_dialog = None  # Keep track of the dialog instance
@@ -180,7 +180,6 @@ class MainWindow(QMainWindow):
 
     def create_text_editors(self):
         """Starts the text editor creation process in a background thread."""
-        # Очищаем список текстовых редакторов перед созданием новых
         self.text_editors = []
         pathes = MainScreen.get_current_file_paths(self.main_screen)
         if not pathes:  # More Pythonic check
@@ -197,7 +196,7 @@ class MainWindow(QMainWindow):
         if self.progress_dialog is None:  # Create only if not exists
             self.progress_dialog = ProgressBarDialog(chp_amount=5, parent=self.main_screen)
             self.progress_dialog.setStyleSheet(APP_STYLE)
-            # Connect the dialog's finished signal (when user closes it) to cleanup
+            # Connect the dialog's finished signal (when user closes it) to clean up
             self.progress_dialog.finished.connect(self.on_progress_dialog_finished)
         else:
             # If dialog exists (e.g., from a previous run), reset it
@@ -405,11 +404,23 @@ class MainWindow(QMainWindow):
             title="Success",
             message=f"Decks '{label}' have been created successfully!",
         )
-        success_dialog.setWindowIcon(QIcon("icons/confirm_icon.png"))  # ✅ Using your new icon
+        success_dialog.yes_btn.setStyleSheet("""
+            QPushButton#yes_button {
+                background-color: #4CAF50;
+                color: white;
+                padding: 6px 12px;
+                border-radius: 4px;
+            }
+            QPushButton#yes_button:hover {
+                background-color: #66bb6a;
+            }
+        """)
+
+        success_dialog.setWindowIcon(QIcon("icons/confirm_icon.png"))
         success_dialog.exec_()
 
     def on_process_finished(self):  # This might be called from other places if needed
-        """Обработчик завершения всего процесса"""
+        """ Called when all processes are completed, e.g., from worker's finished signal."""
         print("All processes completed!")
         # Ensure dialog reference is cleared
         self.progress_dialog = None

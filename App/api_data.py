@@ -6,23 +6,23 @@ API_KEYS_FILE = "api_keys.json"
 
 
 def load_api_keys():
-    """Загружает API-ключи из файла. Если файл пустой или не существует — возвращает пустой список."""
+    # load api keys from a JSON file. if the file does not exist or is empty, return an empty list
     if not os.path.exists(API_KEYS_FILE):
         return []
 
     try:
         with open(API_KEYS_FILE, "r", encoding="utf-8") as f:
             content = f.read()
-            if not content.strip():  # Если файл пустой
+            if not content.strip():  # empty file check
                 return []
             return json.loads(content)
     except json.JSONDecodeError:
-        # Если файл повреждён или содержит некорректный JSON
-        print("Ошибка: файл содержит некорректные данные JSON.")
+        # incorrect file format, return an empty list
+        print("Error: Invalid JSON format in API keys file.")
         return []
 
 
 def save_api_keys(keys):
-    """Сохраняет список API-ключей в файл."""
+    # save api keys to a JSON file
     with open(API_KEYS_FILE, "w", encoding="utf-8") as f:
         json.dump(keys, f, indent=4)

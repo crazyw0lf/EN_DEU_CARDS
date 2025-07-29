@@ -4,7 +4,7 @@ from groq import Groq, InternalServerError, RateLimitError, APIStatusError
 from typing import List, Dict
 
 
-# Загрузка API-ключей из файла
+# loading API keys from a JSON file
 def load_api_keys(filepath: str = "api_keys.json") -> List[Dict[str, str]]:
     if not os.path.exists(filepath):
         raise FileNotFoundError(f"API keys file '{filepath}' not found.")
@@ -12,24 +12,22 @@ def load_api_keys(filepath: str = "api_keys.json") -> List[Dict[str, str]]:
         data = json.load(f)
     return [{"name": item["name"], "key": item["key"]} for item in data]
 
-# Глобальный клиент (будет обновляться при смене ключа)
+
 current_client_index = 0
 
 
 def get_client() -> Groq:
-    # Список ключей
     API_KEYS = load_api_keys()
     global current_client_index
     key_info = API_KEYS[current_client_index]
-    print(f"Using API key from: {key_info['name']}")  # Для отладки
+    print(f"Using API key from: {key_info['name']}")  # for debugging purposes
     return Groq(api_key=key_info["key"])
 
 
 def make_request_with_retry(messages, model="llama-3.3-70b-versatile"):
-    # Список ключей
     API_KEYS = load_api_keys()
     global current_client_index
-    max_retries = len(API_KEYS)  # Количество попыток = количество ключей
+    max_retries = len(API_KEYS)  # number of API keys to try
     last_exception = None
 
     for attempt in range(max_retries):
@@ -62,7 +60,7 @@ def make_request_with_retry(messages, model="llama-3.3-70b-versatile"):
     raise RuntimeError("All API keys have been rate-limited. Try again later.")
 
 
-# === Функция clean_tokenized_text ===
+# cleaning tokenizing text
 def clean_tokenized_text(text):
     instruction = """
     You will receive a list of German words or short phrases.  
@@ -105,7 +103,7 @@ def clean_tokenized_text(text):
     return make_request_with_retry(messages)
 
 
-# === Функция extract_verbs ===
+# extracting verbs from text
 def extract_verbs(text):
     instruction_step1 = """
 You will receive a list of German words or phrases.
@@ -176,7 +174,7 @@ If no lines are valid, return: "No valid entries found."
     return make_request_with_retry(messages2)
 
 
-# === Функция extract_except_verbs ===
+# extracting everything except verbs from text
 def extract_except_verbs(text):
     instruction_step1 = """
 You will receive a list of German words or phrases.  
