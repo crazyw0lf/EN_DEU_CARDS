@@ -133,7 +133,7 @@ class DeckCreationWorker(QObject):
 class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
-        self.setWindowTitle("API Key Manager")
+        self.setWindowTitle("EN-DEU Deck Creator")
         self.setWindowIcon(QIcon("icons/app_icon.png"))
         self.resize(1000, 600)
         # list to hold text editors
